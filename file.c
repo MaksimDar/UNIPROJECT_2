@@ -2,6 +2,7 @@
 #include <string.h>
 #define MAX_LICENSE_CHAR 15
 #define MAX_STRING_SIZE 50
+#define MAX_VEHICLES 8
 typedef struct
 {
     int reduced_hours;
@@ -22,6 +23,14 @@ typedef struct
     int normal_hours;
     int peak_hours;
 } Trucks;
+
+typedef struct
+{
+    char vechicle_type;
+    char license[MAX_LICENSE_CHAR];
+    int hours, minutes;
+    int status;
+} Licenses;
 
 void readRates(int rates_length, char rates_str[])
 {
@@ -58,19 +67,6 @@ void readRates(int rates_length, char rates_str[])
     }
 };
 
-void commandEnter(char command_string[])
-{
-    char vechicleType;
-    char license[MAX_LICENSE_CHAR + 1];
-    int hours, minutes;
-    sscanf(command_string - '0', "enter %c %s %d:%d", &vechicleType, license,
-           &hours, &minutes);
-    printf("\nType: %c", vechicleType);
-    printf("\nlicense: %s", license);
-    printf("\nHours: %d", hours);
-    printf("\n Minutes: %d", minutes);
-};
-
 int main()
 {
     char rates_str[MAX_STRING_SIZE];
@@ -78,11 +74,15 @@ int main()
     int rates_length;
     char vechicle_type;
     char license[MAX_LICENSE_CHAR];
+    char prev_license[MAX_LICENSE_CHAR];
     int hours, minutes;
+    int count_vehicles = 0;
+    int error = 0;
 
     Bikes bike;
     Cars car;
     Trucks truck;
+    Licenses license[MAX_VEHICLES];
 
     printf("Welcome to Parking LS!\n");
     printf("Enter tariffs: ");
@@ -91,27 +91,48 @@ int main()
     rates_length = strlen(rates_str);
     readRates(rates_length, rates_str);
 
-    do
+    for (int i = 0; i < MAX_VEHICLES; i++)
     {
         printf("\nParking LS> ");
         fgets(command_string, sizeof(command_string), stdin);
         if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T'))
         {
-            printf(" (ERROR) Wrong command\n");
+            error = 1;
         }
         else
         {
+
             if (hours > 23 || hours < 0 || minutes < 0 || minutes > 59)
             {
-                printf(" (ERROR) Wrong time format\n");
+                error = 2;
             }
             else
             {
-                printf("Right option");
+                error = 3;
             }
         }
-
-    } while (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'T' && vechicle_type != 'C') || hours > 23 || hours < 0 || minutes < 0 || minutes > 59);
+        switch (error)
+        {
+        case 1:
+            printf(" (ERROR) Wrong command\n");
+            break;
+        case 2:
+            printf(" (ERROR) Wrong time format\n");
+            break;
+        case 3:
+            count_vehicles++;
+            for (int i = 0; i < MAX_VEHICLES; i++)
+            {
+            };
+            if (count_vehicles == MAX_VEHICLES || count_vehicles > MAX_VEHICLES)
+            {
+                printf(" (ERROR) No more vehicles are accepted");
+            }
+            break;
+        default:
+            break;
+        }
+    }
 
     return 0;
 }
@@ -132,3 +153,5 @@ int main()
 // printf("\n Minutes: %d", minutes);
 
 // printf(" (ERROR) Wrong command");
+
+// printf(" (ERROR) This vehicle is already in the parking!");
