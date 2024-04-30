@@ -26,10 +26,11 @@ typedef struct
 
 typedef struct
 {
-    char vechicle_type;
     char license[MAX_LICENSE_CHAR];
-    int hours, minutes;
+    char vechicle_type;
     int status;
+    int hours;
+    int minutes;
 } Licenses;
 
 void readRates(int rates_length, char rates_str[])
@@ -78,29 +79,33 @@ int main()
     int hours, minutes;
     int count_vehicles = 0;
     int error = 0;
-
+    int i;
     Bikes bike;
     Cars car;
     Trucks truck;
-    Licenses license[MAX_VEHICLES];
+    Licenses lic[7];
 
     printf("Welcome to Parking LS!\n");
     printf("Enter tariffs: ");
     scanf("%s", rates_str);
-    getchar();
+    char buffer;
+    scanf("%c", &buffer);
     rates_length = strlen(rates_str);
     readRates(rates_length, rates_str);
 
-    for (int i = 0; i < MAX_VEHICLES; i++)
+    do
     {
         printf("\nParking LS> ");
         fgets(command_string, sizeof(command_string), stdin);
-        if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T'))
+
+        if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, lic[count_vehicles].license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T'))
         {
             error = 1;
         }
         else
         {
+            lic[count_vehicles].minutes = minutes;
+            lic[count_vehicles].hours = hours;
 
             if (hours > 23 || hours < 0 || minutes < 0 || minutes > 59)
             {
@@ -111,6 +116,7 @@ int main()
                 error = 3;
             }
         }
+
         switch (error)
         {
         case 1:
@@ -121,19 +127,24 @@ int main()
             break;
         case 3:
             count_vehicles++;
-            for (int i = 0; i < MAX_VEHICLES; i++)
+            lic[count_vehicles].status = 1;
+            if (count_vehicles > 8)
             {
-            };
-            if (count_vehicles == MAX_VEHICLES || count_vehicles > MAX_VEHICLES)
-            {
-                printf(" (ERROR) No more vehicles are accepted");
+                printf(" (ERROR) No more vehicles are accepted\n");
             }
             break;
         default:
             break;
         }
-    }
 
+    } while (1);
+
+    printf("\nStored Licenses:\n");
+    for (i = 0; i < count_vehicles; i++)
+    {
+        printf("License %d: %s\n", i + 1, lic[i].license);
+        printf("Status %d: %d", i + 1, lic[count_vehicles].status);
+    }
     return 0;
 }
 // BIKES:2/3/4#CARS:3/4/6#TRUCKS:5/10/12
