@@ -144,3 +144,51 @@
 
 //     return 0;
 // }
+
+
+// do
+//     {
+//         printf("\nParking LS> ");
+//         fgets(command_string, sizeof(command_string), stdin);
+//         for (i = 0; i < count_vehicles; i++)
+//         {
+//             if (sscanf(command_string, "enter %c %s %d:%d", &lic[i].vechicle_type, lic[i].license, &lic[i].hours, &lic[i].minutes) != 4 || (lic[i].vechicle_type != 'B' && lic[i].vechicle_type != 'C' && lic[i].vechicle_type != 'T'))
+//             {
+//                 error = 1;
+//             }
+//             else
+//             {
+
+//                 if (hours > 23 || hours < 0 || minutes < 0 || minutes > 59)
+//                 {
+//                     error = 2;
+//                 }
+//                 else
+//                 {
+//                     error = 3;
+//                 }
+//             }
+
+//             switch (error)
+//             {
+//             case 1:
+//                 printf(" (ERROR) Wrong command\n");
+//                 break;
+//             case 2:
+//                 printf(" (ERROR) Wrong time format\n");
+//                 break;
+//             case 3:
+//                 count_vehicles++;
+
+//                 if (count_vehicles == 8)
+//                 {
+//                     printf(" (ERROR) No more vehicles are accepted");
+//                 }
+
+//                 break;
+//             default:
+//                 break;
+//             }
+//         }
+
+//     } while (count_vehicles < 100);
