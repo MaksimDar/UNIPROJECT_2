@@ -32,6 +32,9 @@ typedef struct
     int status;
     int hours;
     int minutes;
+    int bikes_count;
+    int cars_count;
+    int trucks_count;
 } Licenses;
 
 int checkDuplication(Licenses lic[], int count_vehicles, char license[])
@@ -168,8 +171,20 @@ int main()
     int enter_error = 0;
     int exit_error = 0;
     int duplication_error = 0;
+    int counter_b = 0;
+    int counter_c = 0;
+    int counter_t = 0;
+    int total_bikes = 0;
+    int total_cars = 0;
+    int total_trucks = 0;
+
     int i;
     int time;
+    int counter_bikes = 0;
+    int counter_cars = 0;
+    int counter_trucks = 0;
+
+    int vehicle_status = 0;
     Bikes bike;
     Cars car;
     Trucks truck;
@@ -215,7 +230,85 @@ int main()
         fgets(command_string, sizeof(command_string), stdin);
         if (strcmp(command_string, "show occupation\n") == 0)
         {
-            printf("Welcome");
+            printf("Vehicles currently in the parking:\n");
+            printf("BIKES: ");
+            for (i = 0; i < count_vehicles; i++)
+            {
+                if (lic[i].vechicle_type != 'B')
+                {
+                    vehicle_status = 1;
+                }
+                else
+                {
+                    if (lic[i].vechicle_type == 'B')
+                    {
+                        printf("%s", lic[i].license);
+                        counter_bikes++;
+                        if (counter_bikes < lic[count_vehicles].bikes_count)
+                        {
+                            printf(" - ");
+                        }
+                    }
+                }
+            };
+            printf("\nCARS: ");
+            for (i = 0; i < count_vehicles; i++)
+            {
+                if (lic[i].vechicle_type != 'C')
+                {
+                    vehicle_status = 2;
+                }
+                else
+                {
+                    if (lic[i].vechicle_type == 'C')
+                    {
+                        printf("%s", lic[i].license);
+                        counter_cars++;
+                        if (counter_cars < lic[count_vehicles].cars_count)
+                        {
+                            printf(" - ");
+                        }
+                    }
+                }
+            };
+            printf("\nTRUCKS: ");
+            for (i = 0; i < count_vehicles; i++)
+            {
+                if (lic[i].vechicle_type != 'T')
+                {
+                    vehicle_status = 3;
+                }
+                else
+                {
+                    if (lic[i].vechicle_type == 'T')
+                    {
+                        printf("%s", lic[i].license);
+                        counter_trucks++;
+                        if (counter_cars < lic[count_vehicles].trucks_count)
+                        {
+                            printf(" - ");
+                        }
+                        printf("\n");
+                    }
+                }
+            };
+            switch (vehicle_status)
+            {
+            case 1:
+                printf("No bikes");
+                break;
+            case 2:
+                printf("No cars");
+                break;
+            case 3:
+                printf("No trucks\n");
+                break;
+            case 4:
+                printf(" - ");
+                break;
+            default:
+                break;
+            }
         }
         else
         {
@@ -263,6 +356,36 @@ int main()
                         lic[count_vehicles].vechicle_type = vechicle_type;
                         lic[count_vehicles].hours = hours;
                         lic[count_vehicles].minutes = minutes;
+                        if (lic[count_vehicles].vechicle_type == 'B')
+                        {
+                            lic[count_vehicles].bikes_count++;
+                            for (i = 0; i < MAX_VEHICLES - 1; i++)
+                            {
+                                total_bikes += lic[i].bikes_count;
+                            }
+                        }
+                        else
+                        {
+                            if (lic[count_vehicles].vechicle_type == 'C')
+                            {
+                                lic[count_vehicles].cars_count++;
+                                for (i = 0; i < MAX_VEHICLES - 1; i++)
+                                {
+                                    total_cars += lic[i].cars_count;
+                                }
+                            }
+                            else
+                            {
+                                if (lic[count_vehicles].vechicle_type == 'T')
+                                {
+                                    lic[count_vehicles].trucks_count++;
+                                    for (i = 0; i < MAX_VEHICLES - 1; i++)
+                                    {
+                                        total_cars += lic[i].cars_count;
+                                    }
+                                }
+                            }
+                        }
                         count_vehicles++;
                     }
                     else
@@ -359,3 +482,12 @@ int main()
 // enter B 7743BWQ 6:49
 // exit 5109GTY 13:14
 // exit 7743BWQ 21:05
+
+// 3-rd part check
+// enter B 6754BBV 11:15
+// enter C 8788CDF 13:27
+// enter C 9910FSD 14:25
+// enter C 9078FRS 17:19
+// exit 9910FSD 19:17
+// enter C 1909HJK 20:20
+// show occupation
