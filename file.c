@@ -24,11 +24,10 @@ typedef struct
     int normal_hours;
     int peak_hours;
 } Trucks;
-
 typedef struct
 {
     char license[MAX_LICENSE_CHAR];
-    char vechicle_type;
+    char vehicle_type;
     int status;
     int hours;
     int minutes;
@@ -36,14 +35,17 @@ typedef struct
 
 typedef struct
 {
-    char license[MAX_LICENSE_CHAR];
-    int start_time;
-    int finish_time;
+    char vehicle_type;
+    int start_hours;
+    int start_minutes;
+    int finish_hours;
+    int finish_minutes;
     float price;
     int count;
 } Operation;
 typedef struct
 {
+    char license[MAX_LICENSE_CHAR];
     Operation operation;
 } Database;
 
@@ -87,7 +89,7 @@ int checkTime(Licenses lic[], int minutes, int hours, char license[])
     return time_status;
 }
 
-int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Operation operation, Database database)
+int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[])
 {
     int i;
     int total_minutes;
@@ -104,7 +106,7 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
             enter_minutes = lic[i].hours * 60.0 + lic[i].minutes;
             exit_minutes = hours * 60.0 + minutes;
             total_minutes = exit_minutes - enter_minutes;
-            switch (lic[i].vechicle_type)
+            switch (lic[i].vehicle_type)
             {
             case 'B':
                 if ((lic[i].hours >= 0 && lic[i].hours <= 7) || (lic[i].hours >= 21 && lic[i].hours <= 23))
@@ -161,21 +163,62 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
                 break;
             }
             total_price = total_minutes * price_minute;
-            lic[i].license[0] = '\0';
-            lic[i].vechicle_type = '\0';
-            if (database.operation.count < MAX_OPERATIONS)
+            if (strcmp(database[i].license, license) == 0)
             {
-                database.operation.count = 0;
-                operation.start_time = enter_minutes;
-                operation.finish_time = exit_minutes;
-                operation.price = total_price;
-                database.operation.count++;
-            };
+                database[i].operation.count = 0;
+            }
+            if (database[i].operation.count < MAX_OPERATIONS)
+            {
+                strcpy(database[i].license, license);
+                database[i].operation.vehicle_type = lic[i].vehicle_type;
+                database[i].operation.start_hours = lic[i].hours;
+                database[i].operation.start_minutes = lic[i].minutes;
+                database[i].operation.finish_hours = hours;
+                database[i].operation.finish_minutes = minutes;
+                database[i].operation.price = total_price;
+                database[i].operation.count++;
+            }
+            lic[i].license[0] = '\0';
+            lic[i].vehicle_type = '\0';
             count_vehicles--;
+            printf("Operation closed: %.2f euros\n", total_price);
+            printf("License is %s\n", database[i].license);
+            printf("Vehicle type: %c\n", database[i].operation.vehicle_type);
+            printf("Start time %d:%d\n", database[i].operation.start_hours, database[i].operation.start_minutes);
+            printf("Finish time %d:%d\n", database[i].operation.finish_hours, database[i].operation.finish_minutes);
+            printf("%.2f price\n", database[i].operation.price);
+            printf("Count database %d\n", database[i].operation.count);
         }
     };
-    return printf("Operation closed: %.2f euros\n", total_price);
+    return count_vehicles;
 }
+
+void checkDatabase(Database database, int count_vehicles, char license[])
+{
+    int i;
+    char machine_type;
+    for (i = 0; i < count_vehicles; i++)
+    {
+        if (strcmp(database.license, license))
+        {
+            machine_type = database.operation.vehicle_type;
+        };
+    };
+    switch (machine_type)
+    {
+    case 'B':
+        printf("Type of vehicle: BIKE\n");
+        break;
+    case 'C':
+        printf("Type of vehicle: CAR\n");
+        break;
+    case 'T':
+        printf("Type of vehicle: TRUCK\n");
+        break;
+    default:
+        break;
+    }
+};
 
 int main()
 {
@@ -204,13 +247,14 @@ int main()
     int cars_count;
     int trucks_count;
 
-    int detail_status;
+    int detail_status = 0;
+    int process;
     Bikes bike;
     Cars car;
     Trucks truck;
     Licenses lic[MAX_VEHICLES - 1];
-    Operation operation;
-    Database database;
+    Operation operation[100];
+    Database database[100];
 
     printf("Welcome to Parking LS!\n");
     printf("Enter tariffs: ");
@@ -259,7 +303,7 @@ int main()
             int counter_trucks = 0;
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vechicle_type == 'B')
+                if (lic[i].vehicle_type == 'B')
                 {
                     printf("%s", lic[i].license);
                     counter_bikes++;
@@ -276,7 +320,7 @@ int main()
             printf("\nCARS: ");
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vechicle_type == 'C')
+                if (lic[i].vehicle_type == 'C')
                 {
                     printf("%s", lic[i].license);
                     counter_cars++;
@@ -293,7 +337,7 @@ int main()
             printf("\nTRUCKS: ");
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vechicle_type == 'T')
+                if (lic[i].vehicle_type == 'T')
                 {
                     printf("%s", lic[i].license);
                     counter_trucks++;
@@ -312,131 +356,142 @@ int main()
                 printf("\n");
             }
         }
-
         else
         {
-            if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes))
+            if (sscanf(command_string, "show detail %s", license))
             {
-                if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T'))
-                {
-                    enter_error = 1;
-                }
-                else
-                {
-                    if (checkDuplication(lic, count_vehicles, license))
-                    {
-                        enter_error = 2;
-                    }
 
-                    else
-                    {
-                        if (hours > 23 || hours < 0 || minutes < 0 || minutes > 59)
-                        {
-                            enter_error = 3;
-                        }
-                        else
-                        {
-                            enter_error = 4;
-                        }
-                    }
-                }
-                switch (enter_error)
-                {
-                case 1:
-                    printf(" (ERROR) Wrong command\n");
-                    break;
-                case 2:
-                    printf(" (ERROR) This vehicle is already in the parking!\n");
-                    break;
-                case 3:
-                    printf(" (ERROR) Wrong time format\n");
-                    break;
-                case 4:
-                    if (count_vehicles >= 0 && count_vehicles <= MAX_VEHICLES - 1)
-                    {
-                        strcpy(lic[count_vehicles].license, license);
-                        lic[count_vehicles].status = 1;
-                        lic[count_vehicles].vechicle_type = vechicle_type;
-                        lic[count_vehicles].hours = hours;
-                        lic[count_vehicles].minutes = minutes;
-                        if (lic[count_vehicles].vechicle_type == 'B')
-                        {
-                            bikes_count++;
-                        }
-                        else
-                        {
-                            if (lic[count_vehicles].vechicle_type == 'C')
-                            {
-                                cars_count++;
-                            }
-                            else
-                            {
-                                if (lic[count_vehicles].vechicle_type == 'T')
-                                {
-                                    trucks_count++;
-                                }
-                            }
-                        }
-                        count_vehicles++;
-                    }
-                    else
-                    {
-                        printf(" (ERROR) No more vehicles are accepted\n");
-                    };
-                    break;
-                default:
-                    break;
-                }
+                // if (strcmp(database.license, license) != 0)
+                // {
+                //     printf(" (ERROR) This vehicle never used the parking\n");
+                // }
+                // else
+                // {
+                //     printf("Plate: %s\n", license);
+                //     checkDatabase(database, count_vehicles, license);
+                //     // checkVehicle(license, count_vehicles, lic);
+                // }
             }
             else
             {
-                if (sscanf(command_string, "exit %s %d:%d", license, &hours, &minutes) != 3)
+                if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes))
                 {
-                    exit_error = 1;
-                }
-                else
-                {
-                    if (!checkDuplication(lic, count_vehicles, license))
+                    if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T'))
                     {
-                        exit_error = 2;
+                        enter_error = 1;
                     }
                     else
                     {
-                        time = checkTime(lic, minutes, hours, license);
-                        if (time == 3)
+                        if (checkDuplication(lic, count_vehicles, license))
                         {
-                            exit_error = 3;
+                            enter_error = 2;
+                        }
+
+                        else
+                        {
+                            if (hours > 23 || hours < 0 || minutes < 0 || minutes > 59)
+                            {
+                                enter_error = 3;
+                            }
+                            else
+                            {
+                                enter_error = 4;
+                            }
+                        }
+                    }
+                    switch (enter_error)
+                    {
+                    case 1:
+                        printf(" (ERROR) Wrong command\n");
+                        break;
+                    case 2:
+                        printf(" (ERROR) This vehicle is already in the parking!\n");
+                        break;
+                    case 3:
+                        printf(" (ERROR) Wrong time format\n");
+                        break;
+                    case 4:
+                        if (count_vehicles >= 0 && count_vehicles <= MAX_VEHICLES - 1)
+                        {
+                            strcpy(lic[count_vehicles].license, license);
+                            lic[count_vehicles].status = 1;
+                            lic[count_vehicles].vehicle_type = vechicle_type;
+                            lic[count_vehicles].hours = hours;
+                            lic[count_vehicles].minutes = minutes;
+                            if (lic[count_vehicles].vehicle_type == 'B')
+                            {
+                                bikes_count++;
+                            }
+                            else
+                            {
+                                if (lic[count_vehicles].vehicle_type == 'C')
+                                {
+                                    cars_count++;
+                                }
+                                else
+                                {
+                                    if (lic[count_vehicles].vehicle_type == 'T')
+                                    {
+                                        trucks_count++;
+                                    }
+                                }
+                            }
+                            count_vehicles++;
                         }
                         else
                         {
-                            exit_error = 4;
-                        }
+                            printf(" (ERROR) No more vehicles are accepted\n");
+                        };
+                        break;
+                    default:
+                        break;
                     }
                 }
-                switch (exit_error)
+                else
                 {
-                case 1:
-                    printf(" (ERROR) Wrong command\n");
-                    break;
-                case 2:
-                    printf(" (ERROR) This vehicle is not in the parking\n");
-                    break;
-                case 3:
-                    printf(" (ERROR) Incoherent exit time\n");
-                    break;
-                case 4:
-                    operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, operation, database);
-                    printf("%d start time", operation.start_time);
-                    printf("%d finish time", operation.finish_time);
-                    printf("%.2f price", operation.price);
-
-                    break;
-                default:
-                    break;
+                    if (sscanf(command_string, "exit %s %d:%d", license, &hours, &minutes) != 3)
+                    {
+                        exit_error = 1;
+                    }
+                    else
+                    {
+                        if (!checkDuplication(lic, count_vehicles, license))
+                        {
+                            exit_error = 2;
+                        }
+                        else
+                        {
+                            time = checkTime(lic, minutes, hours, license);
+                            if (time == 3)
+                            {
+                                exit_error = 3;
+                            }
+                            else
+                            {
+                                exit_error = 4;
+                            }
+                        }
+                    }
+                    switch (exit_error)
+                    {
+                    case 1:
+                        printf(" (ERROR) Wrong command\n");
+                        break;
+                    case 2:
+                        printf(" (ERROR) This vehicle is not in the parking\n");
+                        break;
+                    case 3:
+                        printf(" (ERROR) Incoherent exit time\n");
+                        break;
+                    case 4:
+                        process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, operation);
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }
-
     } while (1);
     return 0;
 }
@@ -487,3 +542,10 @@ int main()
 // exit 9910FSD 19:17
 // enter C 1909HJK 20:20
 // show occupation
+
+// check the work of database
+
+// printf("License is %s", operation.license);
+//             printf("Start time %d:%d", operation.start_hours, operation.start_minutes);
+//             printf("Finish time %d:%d", operation.finish_hours, operation.finish_minutes);
+//             printf("%.2f price", operation.price);
