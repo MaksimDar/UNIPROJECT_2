@@ -4,6 +4,10 @@
 #define MAX_STRING_SIZE 50
 #define MAX_VEHICLES 8
 #define MAX_OPERATIONS 10
+// my value
+#define DATABASE_STORAGE 1000
+#define COUNTER_STORAGE 1000
+
 typedef struct
 {
     int reduced_hours;
@@ -43,15 +47,18 @@ typedef struct
     int finish_hours;
     int finish_minutes;
     float price;
-} Operation;
-typedef struct
-{
     int total_counter;
-} Counter;
+} Operation;
 typedef struct
 {
     Operation operation;
 } Database;
+
+typedef struct
+{
+    char license[MAX_LICENSE_CHAR];
+    int counter_entrance;
+} Counter;
 
 int checkDuplication(Licenses lic[], int count_vehicles, char license[])
 {
@@ -93,7 +100,7 @@ int checkTime(Licenses lic[], int minutes, int hours, char license[])
     return time_status;
 }
 
-int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], Counter counter)
+int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], Counter counter[])
 {
     int i;
     int total_minutes;
@@ -165,58 +172,123 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
                 break;
             }
             total_price = total_minutes * price_minute;
-            strcpy(database[i].operation.license, license);
             database[i].operation.vehicle_type = lic[i].vehicle_type;
-            database[i].operation.start_hours = lic[i].hours;
-            database[i].operation.start_minutes = lic[i].minutes;
             database[i].operation.finish_hours = hours;
             database[i].operation.finish_minutes = minutes;
             database[i].operation.price = total_price;
             lic[i].license[0] = '\0';
             lic[i].vehicle_type = '\0';
-            count_vehicles--;
             printf("Operation closed: %.2f euros\n", database[i].operation.price);
         };
     };
     return count_vehicles;
 }
 
-void checkDatabase(Database database[], Counter counter, char license[])
+int addDatabase(int total_counter, Database database[], char license[], int hours, int minutes, char vechicle_type, Counter counter[])
 {
     int i;
-    char machine_type = '\0';
-    int found = 0;
-    for (i = 0; i < counter.total_counter; i++)
+    int status = 1;
+    int found_index = -1;
+    int can_update = 1;
+    for (i = 0; i < total_counter; i++)
     {
-        if (strcmp(database[i].operation.license, license))
+        if (strcmp(database[i].operation.license, license) == 0)
         {
-            database[i].operation.vehicle_type = machine_type;
-            found = 1;
+            found_index = i;
+            status = 2;
+            i = total_counter;
         };
     };
-    printf("Plate: %s\n", license);
-    if (found == 1)
+
+    if (status == 1)
     {
-        if (machine_type == 'B')
+        found_index = total_counter;
+    };
+    if (counter[found_index].counter_entrance > 10)
+    {
+        can_update = 0;
+    }
+    if (can_update)
+    {
+        switch (status)
+        {
+        case 1:
+            strcpy(database[found_index].operation.license, license);
+            database[found_index].operation.start_hours = hours;
+            database[found_index].operation.start_minutes = minutes;
+            database[found_index].operation.vehicle_type = vechicle_type;
+            strcpy(counter[found_index].license, license);
+            counter[found_index].counter_entrance = 1;
+            break;
+
+        case 2:
+            database[found_index].operation.start_hours = hours;
+            database[found_index].operation.start_minutes = minutes;
+            counter[found_index].counter_entrance++;
+            break;
+        default:
+            break;
+        }
+    }
+    return total_counter;
+}
+
+void checkDatabase(Database database[], char license[])
+{
+    int i;
+    int status = 0;
+    int found_index = -1;
+
+    for (i = 0; i < DATABASE_STORAGE; i++)
+    {
+        if (strcmp(database[i].operation.license, license) == 0)
+        {
+            found_index = i;
+            status = 1;
+        }
+    }
+
+    if (status == 1)
+    {
+        printf("Plate: %s\n", database[found_index].operation.license);
+        if (database[found_index].operation.vehicle_type == 'B')
         {
             printf("Type of vehicle: BIKE\n");
         }
         else
         {
-            if (machine_type == 'C')
+            if (database[found_index].operation.vehicle_type == 'C')
             {
                 printf("Type of vehicle: CAR\n");
             }
             else
             {
-                if (machine_type == 'T')
+                if (database[found_index].operation.vehicle_type == 'T')
                 {
                     printf("Type of vehicle: TRUCK\n");
                 }
             }
         }
-    }
+    };
 };
+
+void chechOperations(Database database[], char license[], int total_counter)
+{
+    int i;
+    int status = 0;
+    int found_index = -1;
+    printf("Operations:\n");
+    for (i = 0; i < total_counter; i++)
+    {
+        found_index = i;
+
+        if (strcmp(database[found_index].operation.license, license) == 0)
+        {
+
+            printf("        %d:%d\t%d:%d\t%.2f\n", database[found_index].operation.start_hours, database[found_index].operation.start_minutes, database[found_index].operation.finish_hours, database[found_index].operation.finish_minutes, database[found_index].operation.price);
+        }
+    }
+}
 
 int main()
 {
@@ -238,19 +310,19 @@ int main()
     int total_cars = 0;
     int total_trucks = 0;
     int detail_status = 0;
-
     int i;
     int time;
     int process;
+    int total_counter = 0;
     Bikes bike;
     Cars car;
     Trucks truck;
     Licenses lic[MAX_VEHICLES - 1];
     Operation operation[100];
-    Database database[100];
-    Counter counter;
-    int personal_counter = 0;
-
+    Database database[DATABASE_STORAGE];
+    Counter counter[100];
+    int personal_counter = 1;
+    int enter_counter;
     printf("Welcome to Parking LS!\n");
     printf("Enter tariffs: ");
     scanf("%s", rates_str);
@@ -284,7 +356,6 @@ int main()
             }
         }
     };
-
     do
     {
         printf("\nParking LS> ");
@@ -385,34 +456,24 @@ int main()
         {
             if (sscanf(command_string, "show detail %s", license))
             {
-                if (counter.total_counter == 0)
+                for (i = 0; i < DATABASE_STORAGE; i++)
                 {
-                    printf(" (ERROR) This vehicle never used the parking\n");
+                    if (strcmp(counter[i].license, license) == 0)
+                    {
+                        detail_status = 1;
+                    }
+                }
+
+                if (detail_status == 1)
+                {
+                    checkDatabase(database, license);
+                    chechOperations(database, license, total_counter);
                 }
                 else
                 {
-                    for (i = 0; i < counter.total_counter; i++)
+                    if (detail_status == 0)
                     {
-                        if (strcmp(database[i].operation.license, license) == 0)
-                        {
-                            detail_status = 1;
-                        }
-                        else
-                        {
-                            detail_status = 2;
-                        }
-                    }
-
-                    switch (detail_status)
-                    {
-                    case 1:
-                        checkDatabase(database, counter, license);
-                        break;
-                    case 2:
                         printf(" (ERROR) This vehicle never used the parking\n");
-                        break;
-                    default:
-                        break;
                     }
                 }
             }
@@ -457,12 +518,16 @@ int main()
                     case 4:
                         if (count_vehicles >= 0 && count_vehicles <= MAX_VEHICLES - 1)
                         {
-                            strcpy(lic[count_vehicles].license, license);
-                            lic[count_vehicles].status = 1;
-                            lic[count_vehicles].vehicle_type = vechicle_type;
-                            lic[count_vehicles].hours = hours;
-                            lic[count_vehicles].minutes = minutes;
+                            int current_index = count_vehicles;
+                            strcpy(lic[current_index].license, license);
+                            lic[current_index].status = 1;
+                            lic[current_index].vehicle_type = vechicle_type;
+                            lic[current_index].hours = hours;
+                            lic[current_index].minutes = minutes;
                             count_vehicles++;
+
+                            total_counter++;
+                            addDatabase(total_counter, database, license, hours, minutes, vechicle_type, counter);
                         }
                         else
                         {
@@ -496,8 +561,8 @@ int main()
                             {
                                 exit_error = 4;
                             }
-                        }
-                    }
+                        };
+                    };
                     switch (exit_error)
                     {
                     case 1:
@@ -511,8 +576,7 @@ int main()
                         break;
                     case 4:
                         process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, operation, counter);
-                        personal_counter++;
-                        counter.total_counter = personal_counter;
+                        count_vehicles--;
                         break;
                     default:
                         break;
@@ -541,10 +605,6 @@ int main()
 
 // EXIT STRING
 // exit 5109GTY 13:14
-
-// printf("Bike reduced %d,\n normal %d\n, peak %d\n ", bike.reduced_hours,   bike.normal_hours, bike.peak_hours);
-// printf("\nCar reduced %d,\n normal %d\n, peak %d\n ", car.reduced_hours, car.normal_hours, car.peak_hours);
-// printf("\nTruck reduced %d,\n normal %d\n, peak %d\n ", truck.reduced_hours, truck.normal_hours, truck.peak_hours);
 
 //  sscanf(command_string - '0', "enter %c %s %d:%d", &vechicleType, license,
 //            &hours, &minutes);
@@ -589,3 +649,36 @@ int main()
 // printf("License is %s", operation.license);
 //             printf("Start time %d:%d", operation.start_hours, operation.start_minutes);
 //             printf("Finish time %d:%d", operation.finish_hours, operation.finish_minutes);
+
+// enter C 6756FGT 12:55
+// exit  6756FGT 12:55
+
+// enter C 6756FGT 13:15
+// exit  6756FGT 14:14
+
+// enter C 6756FGT 14:28
+// exit  6756FGT 14:56
+
+// enter C 6756FGT 15:55
+// exit  6756FGT 16:30
+
+// enter C 6756FGT 16:55
+// exit  6756FGT 17:30
+
+// enter C 6756FGT 17:55
+// exit  6756FGT 18:30
+
+// enter C 6756FGT 18:55
+// exit  6756FGT 19:30
+
+// enter C 6756FGT 19:55
+// exit  6756FGT 20:30
+
+// enter C 6756FGT 20:55
+// exit  6756FGT 21:30
+
+// enter C 6756FGT 21:55
+// exit  6756FGT 22:30
+
+// enter C 6756FGT 22:55
+// exit  6756FGT 23:30

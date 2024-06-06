@@ -31,21 +31,25 @@
 //     int status;
 //     int hours;
 //     int minutes;
+//     int counter;
 // } Licenses;
 
 // typedef struct
 // {
+//     char license[MAX_LICENSE_CHAR];
 //     char vehicle_type;
 //     int start_hours;
 //     int start_minutes;
 //     int finish_hours;
 //     int finish_minutes;
 //     float price;
-//     int count;
 // } Operation;
 // typedef struct
 // {
-//     char license[MAX_LICENSE_CHAR];
+//     int total_counter;
+// } Counter;
+// typedef struct
+// {
 //     Operation operation;
 // } Database;
 
@@ -89,19 +93,17 @@
 //     return time_status;
 // }
 
-// int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[])
+// int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], Counter counter)
 // {
 //     int i;
 //     int total_minutes;
 //     int enter_minutes;
 //     int exit_minutes;
-//     float price_minute;
-//     float total_price;
+//     float price_minute, total_price;
 //     for (i = 0; i < count_vehicles; i++)
 //     {
 //         if (strcmp(lic[i].license, license) == 0)
 //         {
-
 //             lic[i].status = 0;
 //             enter_minutes = lic[i].hours * 60.0 + lic[i].minutes;
 //             exit_minutes = hours * 60.0 + minutes;
@@ -163,56 +165,52 @@
 //                 break;
 //             }
 //             total_price = total_minutes * price_minute;
-//             if (database[i].operation.count < MAX_OPERATIONS)
-//             {
-//                 strcpy(database[i].license, license);
-//                 database[i].operation.vehicle_type = lic[i].vehicle_type;
-//                 database[i].operation.start_hours = lic[i].hours;
-//                 database[i].operation.start_minutes = lic[i].minutes;
-//                 database[i].operation.finish_hours = hours;
-//                 database[i].operation.finish_minutes = minutes;
-//                 database[i].operation.price = total_price;
-//                 database[i].operation.count++;
-//             };
+//             strcpy(database[i].operation.license, license);
+//             database[i].operation.vehicle_type = lic[i].vehicle_type;
+//             database[i].operation.start_hours = lic[i].hours;
+//             database[i].operation.start_minutes = lic[i].minutes;
+//             database[i].operation.finish_hours = hours;
+//             database[i].operation.finish_minutes = minutes;
+//             database[i].operation.price = total_price;
 //             lic[i].license[0] = '\0';
 //             lic[i].vehicle_type = '\0';
 //             count_vehicles--;
-//             printf("Operation closed: %.2f euros\n", total_price);
-//             printf("License is %s\n", database[i].license);
-//             printf("Vehicle type: %c\n", database[i].operation.vehicle_type);
-//             printf("Start time %d:%d\n", database[i].operation.start_hours, database[i].operation.start_minutes);
-//             printf("Finish time %d:%d\n", database[i].operation.finish_hours, database[i].operation.finish_minutes);
-//             printf("%.2f price\n", database[i].operation.price);
-//             printf("Count database %d\n", database[i].operation.count);
-//         }
+//             printf("Operation closed: %.2f euros\n", database[i].operation.price);
+//         };
 //     };
 //     return count_vehicles;
 // }
 
-// void checkDatabase(Database database, int count_vehicles, char license[])
+// void checkDatabase(Database database[], Counter counter, char license[])
 // {
 //     int i;
-//     char machine_type;
-//     for (i = 0; i < count_vehicles; i++)
+//     char machine_type = ' ';
+//     for (i = 0; i < counter.total_counter; i++)
 //     {
-//         if (strcmp(database.license, license))
+//         if (strcmp(database[i].operation.license, license))
 //         {
-//             machine_type = database.operation.vehicle_type;
+//             machine_type = database[i].operation.vehicle_type;
 //         };
 //     };
-//     switch (machine_type)
+//     printf("Plate: %s\n", license);
+
+//     if (machine_type == 'B')
 //     {
-//     case 'B':
 //         printf("Type of vehicle: BIKE\n");
-//         break;
-//     case 'C':
-//         printf("Type of vehicle: CAR\n");
-//         break;
-//     case 'T':
-//         printf("Type of vehicle: TRUCK\n");
-//         break;
-//     default:
-//         break;
+//     }
+//     else
+//     {
+//         if (machine_type == 'C')
+//         {
+//             printf("Type of vehicle: CAR\n");
+//         }
+//         else
+//         {
+//             if (machine_type == 'T')
+//             {
+//                 printf("Type of vehicle: TRUCK\n");
+//             }
+//         }
 //     }
 // };
 
@@ -235,15 +233,9 @@
 //     int total_bikes = 0;
 //     int total_cars = 0;
 //     int total_trucks = 0;
-
+//     int detail_status = 0;
 //     int i;
 //     int time;
-
-//     int bikes_count;
-//     int cars_count;
-//     int trucks_count;
-
-//     int detail_status = 0;
 //     int process;
 //     Bikes bike;
 //     Cars car;
@@ -251,7 +243,8 @@
 //     Licenses lic[MAX_VEHICLES - 1];
 //     Operation operation[100];
 //     Database database[100];
-
+//     Counter counter;
+//     int personal_counter = 0;
 //     printf("Welcome to Parking LS!\n");
 //     printf("Enter tariffs: ");
 //     scanf("%s", rates_str);
@@ -301,46 +294,61 @@
 //             {
 //                 if (lic[i].vehicle_type == 'B')
 //                 {
-//                     printf("%s", lic[i].license);
 //                     counter_bikes++;
-//                     if (counter_bikes <= bikes_count - 1)
-//                     {
-//                         printf(" - ");
-//                     }
 //                 }
 //             };
 //             if (counter_bikes == 0)
 //             {
 //                 printf("No bikes");
 //             }
+//             else
+//             {
+//                 for (i = 0; i < count_vehicles; i++)
+//                 {
+//                     if (lic[i].vehicle_type == 'B')
+//                     {
+//                         printf("%s", lic[i].license);
+//                         if (counter_bikes > 1)
+//                         {
+//                             printf(" - ");
+//                         }
+//                         counter_bikes--;
+//                     }
+//                 };
+//             }
 //             printf("\nCARS: ");
 //             for (i = 0; i < count_vehicles; i++)
 //             {
 //                 if (lic[i].vehicle_type == 'C')
 //                 {
-//                     printf("%s", lic[i].license);
 //                     counter_cars++;
-//                     if (counter_cars <= cars_count - 1)
-//                     {
-//                         printf(" - ");
-//                     }
 //                 }
 //             };
 //             if (counter_cars == 0)
 //             {
 //                 printf("No cars");
 //             }
+//             else
+//             {
+//                 for (i = 0; i < count_vehicles; i++)
+//                 {
+//                     if (lic[i].vehicle_type == 'C')
+//                     {
+//                         printf("%s", lic[i].license);
+//                         if (counter_cars > 1)
+//                         {
+//                             printf(" - ");
+//                         };
+//                         counter_cars--;
+//                     }
+//                 };
+//             }
 //             printf("\nTRUCKS: ");
 //             for (i = 0; i < count_vehicles; i++)
 //             {
 //                 if (lic[i].vehicle_type == 'T')
 //                 {
-//                     printf("%s", lic[i].license);
 //                     counter_trucks++;
-//                     if (counter_trucks <= trucks_count - 1)
-//                     {
-//                         printf(" - ");
-//                     }
 //                 }
 //             }
 //             if (counter_trucks == 0)
@@ -349,24 +357,57 @@
 //             }
 //             else
 //             {
-//                 printf("\n");
+//                 for (i = 0; i < count_vehicles; i++)
+//                 {
+//                     if (lic[i].vehicle_type == 'T')
+//                     {
+//                         printf("%s", lic[i].license);
+//                         if (counter_trucks > 1)
+//                         {
+//                             printf(" - ");
+//                         }
+//                         else
+//                         {
+//                             printf("\n");
+//                         }
+//                         counter_trucks--;
+//                     }
+//                 };
 //             }
 //         }
 //         else
 //         {
 //             if (sscanf(command_string, "show detail %s", license))
 //             {
+//                 if (counter.total_counter == 0)
+//                 {
+//                     printf(" (ERROR) This vehicle never used the parking\n");
+//                 }
+//                 else
+//                 {
+//                     for (i = 0; i < counter.total_counter; i++)
+//                     {
+//                         if (strcmp(database[i].operation.license, license) == 0)
+//                         {
+//                             detail_status = 1;
+//                         }
+//                         else
+//                         {
+//                             detail_status = 2;
+//                         }
+//                     }
 
-//                 // if (strcmp(database.license, license) != 0)
-//                 // {
-//                 //     printf(" (ERROR) This vehicle never used the parking\n");
-//                 // }
-//                 // else
-//                 // {
-//                 //     printf("Plate: %s\n", license);
-//                 //     checkDatabase(database, count_vehicles, license);
-//                 //     // checkVehicle(license, count_vehicles, lic);
-//                 // }
+//                     switch (detail_status)
+//                     {
+//                     case 1:
+//                         checkDatabase(database, counter, license);
+//                     case 2:
+//                         printf(" (ERROR) This vehicle never used the parking\n");
+//                         break;
+//                     default:
+//                         break;
+//                     }
+//                 }
 //             }
 //             else
 //             {
@@ -414,24 +455,6 @@
 //                             lic[count_vehicles].vehicle_type = vechicle_type;
 //                             lic[count_vehicles].hours = hours;
 //                             lic[count_vehicles].minutes = minutes;
-//                             if (lic[count_vehicles].vehicle_type == 'B')
-//                             {
-//                                 bikes_count++;
-//                             }
-//                             else
-//                             {
-//                                 if (lic[count_vehicles].vehicle_type == 'C')
-//                                 {
-//                                     cars_count++;
-//                                 }
-//                                 else
-//                                 {
-//                                     if (lic[count_vehicles].vehicle_type == 'T')
-//                                     {
-//                                         trucks_count++;
-//                                     }
-//                                 }
-//                             }
 //                             count_vehicles++;
 //                         }
 //                         else
@@ -480,7 +503,9 @@
 //                         printf(" (ERROR) Incoherent exit time\n");
 //                         break;
 //                     case 4:
-//                         process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, operation);
+//                         process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, operation, counter);
+//                         personal_counter++;
+//                         counter.total_counter = personal_counter;
 //                         break;
 //                     default:
 //                         break;
@@ -490,4 +515,55 @@
 //         }
 //     } while (1);
 //     return 0;
+// }
+
+// void addDatabase(int total_counter, Operation operation[], Database database[], char license[], int hours, int minutes, Counter counter[])
+// {
+//     int i;
+//     int status = 0;
+
+//     for (i = 0; i < total_counter; i++)
+//     {
+//         if (strcmp(database[i].operation.license, license) != 0)
+//         {
+//             status = 1;
+//         }
+//         else
+//         {
+//             status = 2;
+//         }
+//     };
+//     switch (status)
+//     {
+//     case 1:
+//         strcpy(database[i].operation.license, license);
+//         database[i].operation.start_hours = hours;
+//         database[i].operation.start_minutes = minutes;
+//         strcpy(counter[i].license, license);
+
+//         counter[i].counter_entrance = 1;
+//         printf("License %s\n", database[i].operation.license);
+//         printf("Hours %d\n", database[i].operation.start_hours);
+//         printf("Minutes %d\n", database[i].operation.start_minutes);
+//         printf("Counter %d\n", counter[i].counter_entrance);
+//         break;
+//     case 2:
+//         if (counter[i].counter_entrance < MAX_OPERATIONS && database[i].operation.total_counter != 1)
+//         {
+//             strcpy(database[i].operation.license, license);
+//             database[i].operation.start_hours = hours;
+//             database[i].operation.start_minutes = minutes;
+//             if (strcmp(counter[i].license, license))
+//             {
+//                 counter[i].counter_entrance++;
+//             }
+//             printf("License %s\n", database[i].operation.license);
+//             printf("Hours %d\n", database[i].operation.start_hours);
+//             printf("Minutes %d\n", database[i].operation.start_minutes);
+//             printf("Counter %d\n", counter[i].counter_entrance);
+//         }
+//         break;
+//     default:
+//         break;
+//     }
 // }
