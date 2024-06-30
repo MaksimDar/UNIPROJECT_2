@@ -176,13 +176,15 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
             database[i].operation.finish_hours = hours;
             database[i].operation.finish_minutes = minutes;
             database[i].operation.price = total_price;
+            printf("Operation closed: %.2f euros\n", database[i].operation.price);
             lic[i].license[0] = '\0';
             lic[i].vehicle_type = '\0';
-            printf("Operation closed: %.2f euros\n", database[i].operation.price);
+            
         };
     };
     return count_vehicles;
 }
+
 
 int addDatabase(int total_counter, Database database[], char license[], int hours, int minutes, char vechicle_type, Counter counter[])
 {
@@ -369,7 +371,7 @@ int main()
             int counter_trucks = 0;
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vehicle_type == 'B')
+                if (lic[i].vehicle_type == 'B' && lic[i].status == 1)
                 {
                     counter_bikes++;
                 }
@@ -382,7 +384,7 @@ int main()
             {
                 for (i = 0; i < count_vehicles; i++)
                 {
-                    if (lic[i].vehicle_type == 'B')
+                    if (lic[i].vehicle_type == 'B' && lic[i].status == 1)
                     {
                         printf("%s", lic[i].license);
                         if (counter_bikes > 1)
@@ -396,7 +398,7 @@ int main()
             printf("\nCARS: ");
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vehicle_type == 'C')
+                if (lic[i].vehicle_type == 'C' && lic[i].status == 1)
                 {
                     counter_cars++;
                 }
@@ -409,7 +411,7 @@ int main()
             {
                 for (i = 0; i < count_vehicles; i++)
                 {
-                    if (lic[i].vehicle_type == 'C')
+                    if (lic[i].vehicle_type == 'C' && lic[i].status == 1)
                     {
                         printf("%s", lic[i].license);
                         if (counter_cars > 1)
@@ -423,7 +425,7 @@ int main()
             printf("\nTRUCKS: ");
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vehicle_type == 'T')
+                if (lic[i].vehicle_type == 'T' && lic[i].status == 1)
                 {
                     counter_trucks++;
                 }
@@ -436,7 +438,7 @@ int main()
             {
                 for (i = 0; i < count_vehicles; i++)
                 {
-                    if (lic[i].vehicle_type == 'T')
+                    if (lic[i].vehicle_type == 'T' && lic[i].status == 1)
                     {
                         printf("%s", lic[i].license);
                         if (counter_trucks > 1)
@@ -606,17 +608,6 @@ int main()
 // EXIT STRING
 // exit 5109GTY 13:14
 
-//  sscanf(command_string - '0', "enter %c %s %d:%d", &vechicleType, license,
-//            &hours, &minutes);
-// printf("\nType: %c", vechicleType);
-// printf("\nlicense: %s", license);
-// printf("\nHours: %d", hours);
-// printf("\n Minutes: %d", minutes);
-
-// printf(" (ERROR) Wrong command");
-
-// printf(" (ERROR) This vehicle is already in the parking!");
-
 // enter C 5109GTY 9:23
 // enter B 7743BWQ 6:49
 // exit 5109GTY 13:14
@@ -627,6 +618,7 @@ int main()
 // enter C 8788CDF 13:27
 // enter C 9910FSD 14:25
 // enter C 9078FRS 17:19
+// enter C 1456HJK 21:20
 // exit 9910FSD 19:17
 // enter C 1909HJK 20:20
 // show occupation
@@ -646,9 +638,6 @@ int main()
 
 // check the work of database
 
-// printf("License is %s", operation.license);
-//             printf("Start time %d:%d", operation.start_hours, operation.start_minutes);
-//             printf("Finish time %d:%d", operation.finish_hours, operation.finish_minutes);
 
 // enter C 6756FGT 12:55
 // exit  6756FGT 12:55
