@@ -179,7 +179,6 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
             printf("Operation closed: %.2f euros\n", database[i].operation.price);
             lic[i].license[0] = '\0';
             lic[i].vehicle_type = '\0';
-            
         };
     };
     return count_vehicles;
