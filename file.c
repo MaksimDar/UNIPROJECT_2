@@ -53,45 +53,34 @@ typedef struct {
     int counter_entrance;
 } Counter;
 
-int checkDuplication(Licenses lic[], int count_vehicles, char license[])
-{
+int checkDuplication(Licenses lic[], int count_vehicles, char license[]) {
     int i = 0;
     int is_duplication = 0;
-    for (i = 0; i < count_vehicles; i++)
-    {
-        if (strcmp(lic[i].license, license) == 0)
-        {
+    for (i = 0; i < count_vehicles; i++) {
+        if (strcmp(lic[i].license, license) == 0) {
             is_duplication = 1;
             i = count_vehicles;
-        }
-        else
-        {
+        } else {
             is_duplication = 0;
         }
     }
     return is_duplication;
-}
+};
 
-int checkTime(Licenses lic[], int minutes, int hours, char license[])
-{
+int checkTime(Licenses lic[], int minutes, int hours, char license[]) {
     int i;
     int time_status;
-    for (i = 0; i < MAX_VEHICLES; i++)
-    {
-        if (strcmp(lic[i].license, license) == 0)
-        {
-            if ((minutes <= lic[i].minutes && hours == lic[i].hours) || hours < lic[i].hours)
-            {
+    for (i = 0; i < MAX_VEHICLES; i++) {
+        if (strcmp(lic[i].license, license) == 0) {
+            if ((minutes <= lic[i].minutes && hours == lic[i].hours) || hours < lic[i].hours) {
                 time_status = 3;
-            }
-            else
-            {
+            } else {
                 time_status = 0;
             }
         }
     };
     return time_status;
-}
+};
 
 int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], Counter counter[]) {
     int i;
@@ -99,63 +88,42 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
     int enter_minutes;
     int exit_minutes;
     float price_minute, total_price;
-    for (i = 0; i < count_vehicles; i++)
-    {
-        if (strcmp(lic[i].license, license) == 0)
-        {
+    for (i = 0; i < count_vehicles; i++) {
+        if (strcmp(lic[i].license, license) == 0) {
             lic[i].status = 0;
             enter_minutes = lic[i].hours * 60.0 + lic[i].minutes;
             exit_minutes = hours * 60.0 + minutes;
             total_minutes = exit_minutes - enter_minutes;
-            switch (lic[i].vehicle_type)
-            {
+            switch (lic[i].vehicle_type) {
             case 'B':
-                if ((lic[i].hours >= 0 && lic[i].hours <= 7) || (lic[i].hours >= 21 && lic[i].hours <= 23))
-                {
+                if ((lic[i].hours >= 0 && lic[i].hours <= 7) || (lic[i].hours >= 21 && lic[i].hours <= 23)) {
                     price_minute = bike.reduced_hours * 0.01;
-                }
-                else
-                {
-                    if ((lic[i].hours >= 10 && lic[i].hours <= 12) || (lic[i].hours >= 16 && lic[i].hours <= 19))
-                    {
+                } else {
+                    if ((lic[i].hours >= 10 && lic[i].hours <= 12) || (lic[i].hours >= 16 && lic[i].hours <= 19)) {
                         price_minute = bike.peak_hours * 0.01;
-                    }
-                    else
-                    {
+                    } else {
                         price_minute = bike.normal_hours * 0.01;
                     }
                 }
                 break;
             case 'C':
-                if ((lic[i].hours >= 0 && lic[i].hours <= 7) || (lic[i].hours >= 21 && lic[i].hours <= 23))
-                {
+                if ((lic[i].hours >= 0 && lic[i].hours <= 7) || (lic[i].hours >= 21 && lic[i].hours <= 23)) {
                     price_minute = car.reduced_hours * 0.01;
-                }
-                else
-                {
-                    if ((lic[i].hours >= 10 && lic[i].hours <= 12) || (lic[i].hours >= 16 && lic[i].hours <= 19))
-                    {
+                } else {
+                    if ((lic[i].hours >= 10 && lic[i].hours <= 12) || (lic[i].hours >= 16 && lic[i].hours <= 19)) {
                         price_minute = car.peak_hours * 0.01;
-                    }
-                    else
-                    {
+                    } else {
                         price_minute = car.normal_hours * 0.01;
                     }
                 }
                 break;
             case 'T':
-                if ((lic[i].hours >= 0 && lic[i].hours <= 7) || (lic[i].hours >= 21 && lic[i].hours <= 23))
-                {
+                if ((lic[i].hours >= 0 && lic[i].hours <= 7) || (lic[i].hours >= 21 && lic[i].hours <= 23)) {
                     price_minute = truck.reduced_hours * 0.01;
-                }
-                else
-                {
-                    if ((lic[i].hours >= 10 && lic[i].hours <= 12) || (lic[i].hours >= 16 && lic[i].hours <= 19))
-                    {
+                } else {
+                    if ((lic[i].hours >= 10 && lic[i].hours <= 12) || (lic[i].hours >= 16 && lic[i].hours <= 19)) {
                         price_minute = truck.peak_hours * 0.01;
-                    }
-                    else
-                    {
+                    } else {
                         price_minute = truck.normal_hours * 0.01;
                     }
                 }
@@ -174,37 +142,30 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
         };
     };
     return count_vehicles;
-}
+};
 
 
-int addDatabase(int total_counter, Database database[], char license[], int hours, int minutes, char vechicle_type, Counter counter[])
-{
+int addDatabase(int total_counter, Database database[], char license[], int hours, int minutes, char vechicle_type, Counter counter[]) {
     int i;
     int status = 1;
     int found_index = -1;
     int can_update = 1;
-    for (i = 0; i < total_counter; i++)
-    {
-        if (strcmp(database[i].operation.license, license) == 0)
-        {
+    for (i = 0; i < total_counter; i++) {
+        if (strcmp(database[i].operation.license, license) == 0) {
             found_index = i;
             status = 2;
             i = total_counter;
         };
     };
 
-    if (status == 1)
-    {
+    if (status == 1) {
         found_index = total_counter;
     };
-    if (counter[found_index].counter_entrance > 10)
-    {
+    if (counter[found_index].counter_entrance > 10) {
         can_update = 0;
     }
-    if (can_update)
-    {
-        switch (status)
-        {
+    if (can_update) {
+        switch (status) {
         case 1:
             strcpy(database[found_index].operation.license, license);
             database[found_index].operation.start_hours = hours;
@@ -224,40 +185,28 @@ int addDatabase(int total_counter, Database database[], char license[], int hour
         }
     }
     return total_counter;
-}
+};
 
-void checkDatabase(Database database[], char license[])
-{
+void checkDatabase(Database database[], char license[]) {
     int i;
     int status = 0;
     int found_index = -1;
-
-    for (i = 0; i < DATABASE_STORAGE; i++)
-    {
-        if (strcmp(database[i].operation.license, license) == 0)
-        {
+    for (i = 0; i < DATABASE_STORAGE; i++) {
+        if (strcmp(database[i].operation.license, license) == 0) {
             found_index = i;
             status = 1;
         }
     }
-
-    if (status == 1)
-    {
+    
+    if (status == 1) {
         printf("Plate: %s\n", database[found_index].operation.license);
-        if (database[found_index].operation.vehicle_type == 'B')
-        {
+        if (database[found_index].operation.vehicle_type == 'B') {
             printf("Type of vehicle: BIKE\n");
-        }
-        else
-        {
-            if (database[found_index].operation.vehicle_type == 'C')
-            {
+        } else {
+            if (database[found_index].operation.vehicle_type == 'C') {
                 printf("Type of vehicle: CAR\n");
-            }
-            else
-            {
-                if (database[found_index].operation.vehicle_type == 'T')
-                {
+            } else {
+                if (database[found_index].operation.vehicle_type == 'T') {
                     printf("Type of vehicle: TRUCK\n");
                 }
             }
@@ -265,23 +214,18 @@ void checkDatabase(Database database[], char license[])
     };
 };
 
-void chechOperations(Database database[], char license[], int total_counter)
-{
+void chechOperations(Database database[], char license[], int total_counter) {
     int i;
     int status = 0;
     int found_index = -1;
     printf("Operations:\n");
-    for (i = 0; i < total_counter; i++)
-    {
+    for (i = 0; i < total_counter; i++) {
         found_index = i;
-
-        if (strcmp(database[found_index].operation.license, license) == 0)
-        {
-
+        if (strcmp(database[found_index].operation.license, license) == 0) {
             printf("        %d:%d\t%d:%d\t%.2f\n", database[found_index].operation.start_hours, database[found_index].operation.start_minutes, database[found_index].operation.finish_hours, database[found_index].operation.finish_minutes, database[found_index].operation.price);
         }
     }
-}
+};
 
 int main()
 {
@@ -322,64 +266,48 @@ int main()
     char buffer;
     scanf("%c", &buffer);
     rates_length = strlen(rates_str);
-    for (i = 0; i < rates_length; i++)
-    {
-        if (rates_str[i] == 'B' && (rates_str[i - 1] == '#' || i == 0))
-        {
+    for (i = 0; i < rates_length; i++) {
+        if (rates_str[i] == 'B' && (rates_str[i - 1] == '#' || i == 0)) {
             bike.reduced_hours = rates_str[i + 6] - '0';
             bike.normal_hours = rates_str[i + 8] - '0';
             bike.peak_hours = rates_str[i + 10] - '0';
         }
-        if (rates_str[i] == 'C' && (rates_str[i - 1] == '#' || i == 0))
-        {
+        if (rates_str[i] == 'C' && (rates_str[i - 1] == '#' || i == 0)) {
             car.reduced_hours = rates_str[i + 5] - '0';
             car.normal_hours = rates_str[i + 7] - '0';
             car.peak_hours = rates_str[i + 9] - '0';
         };
-        if (rates_str[i] == 'T' && (rates_str[i - 1] == '#' || i == 0))
-        {
+        if (rates_str[i] == 'T' && (rates_str[i - 1] == '#' || i == 0)) {
             truck.reduced_hours = rates_str[i + 7] - '0';
-            if (rates_str[i + 9] == '1' && rates_str[i + 10] == '0')
-            {
+            if (rates_str[i + 9] == '1' && rates_str[i + 10] == '0') {
                 truck.normal_hours = 10;
-            }
-            if (rates_str[i + 12] == '1' && rates_str[i + 13] == '2')
-            {
+            };
+            if (rates_str[i + 12] == '1' && rates_str[i + 13] == '2') {
                 truck.peak_hours = 12;
-            }
+            };
         }
     };
-    do
-    {
+    do {
         printf("\nParking LS> ");
         fgets(command_string, sizeof(command_string), stdin);
-        if (strcmp(command_string, "show occupation\n") == 0)
-        {
+        if (strcmp(command_string, "show occupation\n") == 0) {
             printf("Vehicles currently in the parking:\n");
             printf("BIKES: ");
             int counter_bikes = 0;
             int counter_cars = 0;
             int counter_trucks = 0;
-            for (i = 0; i < count_vehicles; i++)
-            {
-                if (lic[i].vehicle_type == 'B')
-                {
+            for (i = 0; i < count_vehicles; i++) {
+                if (lic[i].vehicle_type == 'B') {
                     counter_bikes++;
                 }
             };
-            if (counter_bikes == 0)
-            {
+            if (counter_bikes == 0) {
                 printf("No bikes");
-            }
-            else
-            {
-                for (i = 0; i < count_vehicles; i++)
-                {
-                    if (lic[i].vehicle_type == 'B')
-                    {
+            } else {
+                for (i = 0; i < count_vehicles; i++) {
+                    if (lic[i].vehicle_type == 'B') {
                         printf("%s", lic[i].license);
-                        if (counter_bikes > 1)
-                        {
+                        if (counter_bikes > 1) {
                             printf(" - ");
                         }
                         counter_bikes--;
@@ -387,26 +315,18 @@ int main()
                 };
             }
             printf("\nCARS: ");
-            for (i = 0; i < count_vehicles; i++)
-            {
-                if (lic[i].vehicle_type == 'C')
-                {
+            for (i = 0; i < count_vehicles; i++) {
+                if (lic[i].vehicle_type == 'C') {
                     counter_cars++;
                 }
             };
-            if (counter_cars == 0)
-            {
+            if (counter_cars == 0) {
                 printf("No cars");
-            }
-            else
-            {
-                for (i = 0; i < count_vehicles; i++)
-                {
-                    if (lic[i].vehicle_type == 'C')
-                    {
+            } else {
+                for (i = 0; i < count_vehicles; i++) {
+                    if (lic[i].vehicle_type == 'C') {
                         printf("%s", lic[i].license);
-                        if (counter_cars > 1)
-                        {
+                        if (counter_cars > 1) {
                             printf(" - ");
                         };
                         counter_cars--;
@@ -414,91 +334,59 @@ int main()
                 };
             }
             printf("\nTRUCKS: ");
-            for (i = 0; i < count_vehicles; i++)
-            {
-                if (lic[i].vehicle_type == 'T')
-                {
+            for (i = 0; i < count_vehicles; i++) {
+                if (lic[i].vehicle_type == 'T') {
                     counter_trucks++;
                 }
             }
-            if (counter_trucks == 0)
-            {
+            if (counter_trucks == 0) {
                 printf("No trucks\n");
-            }
-            else
-            {
-                for (i = 0; i < count_vehicles; i++)
-                {
-                    if (lic[i].vehicle_type == 'T')
-                    {
+            } else {
+                for (i = 0; i < count_vehicles; i++) {
+                    if (lic[i].vehicle_type == 'T') {
                         printf("%s", lic[i].license);
-                        if (counter_trucks > 1)
-                        {
+                        if (counter_trucks > 1) {
                             printf(" - ");
-                        }
-                        else
-                        {
+                        } else {
                             printf("\n");
                         }
                         counter_trucks--;
                     }
                 };
             }
-        }
-        else
-        {
-            if (sscanf(command_string, "show detail %s", license))
-            {
-                for (i = 0; i < DATABASE_STORAGE; i++)
-                {
-                    if (strcmp(counter[i].license, license) == 0)
-                    {
+        } else {
+            if (sscanf(command_string, "show detail %s", license)) {
+                for (i = 0; i < DATABASE_STORAGE; i++) {
+                    if (strcmp(counter[i].license, license) == 0) {
                         detail_status = 1;
                     }
                 }
 
-                if (detail_status == 1)
-                {
+                if (detail_status == 1) {
                     checkDatabase(database, license);
                     chechOperations(database, license, total_counter);
-                }
-                else
-                {
-                    if (detail_status == 0)
-                    {
+                } else {
+                    if (detail_status == 0) {
                         printf(" (ERROR) This vehicle never used the parking\n");
                     }
                 }
-            }
-            else
-            {
-                if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes))
-                {
-                    if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T'))
-                    {
+            } else {
+                if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes)) {
+                    if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T')) {
                         enter_error = 1;
-                    }
-                    else
-                    {
-                        if (checkDuplication(lic, count_vehicles, license))
-                        {
+                    } else {
+                        if (checkDuplication(lic, count_vehicles, license)) {
                             enter_error = 2;
-                        }
-
-                        else
-                        {
-                            if (hours > 23 || hours < 0 || minutes < 0 || minutes > 59)
-                            {
+                        } else {
+                            if (hours > 23 || hours < 0 || minutes < 0 || minutes > 59) {
                                 enter_error = 3;
-                            }
-                            else
-                            {
+                            } else {
                                 enter_error = 4;
                             }
                         }
                     }
-                    switch (enter_error)
-                    {
+
+                    switch (enter_error) {
                     case 1:
                         printf(" (ERROR) Wrong command\n");
                         break;
@@ -509,8 +397,7 @@ int main()
                         printf(" (ERROR) Wrong time format\n");
                         break;
                     case 4:
-                        if (count_vehicles >= 0 && count_vehicles <= MAX_VEHICLES - 1)
-                        {
+                        if (count_vehicles >= 0 && count_vehicles <= MAX_VEHICLES - 1) {
                             int current_index = count_vehicles;
                             strcpy(lic[current_index].license, license);
                             lic[current_index].status = 1;
@@ -518,39 +405,26 @@ int main()
                             lic[current_index].hours = hours;
                             lic[current_index].minutes = minutes;
                             count_vehicles++;
-
                             total_counter++;
                             addDatabase(total_counter, database, license, hours, minutes, vechicle_type, counter);
-                        }
-                        else  {
+                        } else  {
                             printf(" (ERROR) No more vehicles are accepted\n");
                         };
                         break;
                     default:
                         break;
                     }
-                }
-                else
-                {
-                    if (sscanf(command_string, "exit %s %d:%d", license, &hours, &minutes) != 3)
-                    {
+                } else {
+                    if (sscanf(command_string, "exit %s %d:%d", license, &hours, &minutes) != 3) {
                         exit_error = 1;
-                    }
-                    else
-                    {
-                        if (!checkDuplication(lic, count_vehicles, license))
-                        {
+                    } else {
+                        if (!checkDuplication(lic, count_vehicles, license)) {
                             exit_error = 2;
-                        }
-                        else
-                        {
+                        } else {
                             time = checkTime(lic, minutes, hours, license);
-                            if (time == 3)
-                            {
+                            if (time == 3) {
                                 exit_error = 3;
-                            }
-                            else
-                            {
+                            } else {
                                 exit_error = 4;
                             }
                         };
