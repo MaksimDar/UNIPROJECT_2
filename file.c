@@ -4,32 +4,28 @@
 #define MAX_STRING_SIZE 50
 #define MAX_VEHICLES 8
 #define MAX_OPERATIONS 10
-// my value
+// my values
 #define DATABASE_STORAGE 1000
 #define COUNTER_STORAGE 1000
 
-typedef struct
-{
+typedef struct {
     int reduced_hours;
     int normal_hours;
     int peak_hours;
 } Bikes;
 
-typedef struct
-{
+typedef struct {
     int reduced_hours;
     int normal_hours;
     int peak_hours;
 } Cars;
 
-typedef struct
-{
+typedef struct {
     int reduced_hours;
     int normal_hours;
     int peak_hours;
 } Trucks;
-typedef struct
-{
+typedef struct {
     char license[MAX_LICENSE_CHAR];
     char vehicle_type;
     int status;
@@ -38,8 +34,7 @@ typedef struct
     int counter;
 } Licenses;
 
-typedef struct
-{
+typedef struct {
     char license[MAX_LICENSE_CHAR];
     char vehicle_type;
     int start_hours;
@@ -49,13 +44,11 @@ typedef struct
     float price;
     int total_counter;
 } Operation;
-typedef struct
-{
+typedef struct {
     Operation operation;
 } Database;
 
-typedef struct
-{
+typedef struct {
     char license[MAX_LICENSE_CHAR];
     int counter_entrance;
 } Counter;
@@ -100,8 +93,7 @@ int checkTime(Licenses lic[], int minutes, int hours, char license[])
     return time_status;
 }
 
-int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], Counter counter[])
-{
+int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], Counter counter[]) {
     int i;
     int total_minutes;
     int enter_minutes;
@@ -370,7 +362,7 @@ int main()
             int counter_trucks = 0;
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vehicle_type == 'B' && lic[i].status == 1)
+                if (lic[i].vehicle_type == 'B')
                 {
                     counter_bikes++;
                 }
@@ -383,7 +375,7 @@ int main()
             {
                 for (i = 0; i < count_vehicles; i++)
                 {
-                    if (lic[i].vehicle_type == 'B' && lic[i].status == 1)
+                    if (lic[i].vehicle_type == 'B')
                     {
                         printf("%s", lic[i].license);
                         if (counter_bikes > 1)
@@ -397,7 +389,7 @@ int main()
             printf("\nCARS: ");
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vehicle_type == 'C' && lic[i].status == 1)
+                if (lic[i].vehicle_type == 'C')
                 {
                     counter_cars++;
                 }
@@ -410,7 +402,7 @@ int main()
             {
                 for (i = 0; i < count_vehicles; i++)
                 {
-                    if (lic[i].vehicle_type == 'C' && lic[i].status == 1)
+                    if (lic[i].vehicle_type == 'C')
                     {
                         printf("%s", lic[i].license);
                         if (counter_cars > 1)
@@ -424,7 +416,7 @@ int main()
             printf("\nTRUCKS: ");
             for (i = 0; i < count_vehicles; i++)
             {
-                if (lic[i].vehicle_type == 'T' && lic[i].status == 1)
+                if (lic[i].vehicle_type == 'T')
                 {
                     counter_trucks++;
                 }
@@ -437,7 +429,7 @@ int main()
             {
                 for (i = 0; i < count_vehicles; i++)
                 {
-                    if (lic[i].vehicle_type == 'T' && lic[i].status == 1)
+                    if (lic[i].vehicle_type == 'T')
                     {
                         printf("%s", lic[i].license);
                         if (counter_trucks > 1)
@@ -530,8 +522,7 @@ int main()
                             total_counter++;
                             addDatabase(total_counter, database, license, hours, minutes, vechicle_type, counter);
                         }
-                        else
-                        {
+                        else  {
                             printf(" (ERROR) No more vehicles are accepted\n");
                         };
                         break;
@@ -564,8 +555,7 @@ int main()
                             }
                         };
                     };
-                    switch (exit_error)
-                    {
+                    switch (exit_error) {
                     case 1:
                         printf(" (ERROR) Wrong command\n");
                         break;
@@ -617,7 +607,6 @@ int main()
 // enter C 8788CDF 13:27
 // enter C 9910FSD 14:25
 // enter C 9078FRS 17:19
-// enter C 1456HJK 21:20
 // exit 9910FSD 19:17
 // enter C 1909HJK 20:20
 // show occupation
