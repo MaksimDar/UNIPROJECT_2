@@ -31,7 +31,6 @@ typedef struct {
     int status;
     int hours;
     int minutes;
-    int counter;
 } Licenses;
 
 typedef struct {
@@ -82,7 +81,7 @@ int checkTime(Licenses lic[], int minutes, int hours, char license[]) {
     return time_status;
 };
 
-int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], Counter counter[]) {
+int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], int total_counter) {
     int i;
     int total_minutes;
     int enter_minutes;
@@ -132,15 +131,16 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
                 break;
             }
             total_price = total_minutes * price_minute;
-            database[i].operation.vehicle_type = lic[i].vehicle_type;
-            database[i].operation.finish_hours = hours;
-            database[i].operation.finish_minutes = minutes;
-            database[i].operation.price = total_price;
-            printf("Operation closed: %.2f euros\n", database[i].operation.price);
+            database[total_counter].operation.vehicle_type = lic[i].vehicle_type;
+            database[total_counter].operation.finish_hours = hours;
+            database[total_counter].operation.finish_minutes = minutes;
+            database[total_counter].operation.price = total_price;
+            printf("Operation closed: %.2f euros\n", database[total_counter].operation.price);
             lic[i].license[0] = '\0';
             lic[i].vehicle_type = '\0';
         };
     };
+    count_vehicles--;
     return count_vehicles;
 };
 
@@ -224,11 +224,10 @@ void chechOperations(Database database[], char license[], int total_counter) {
         if (strcmp(database[found_index].operation.license, license) == 0) {
             printf("        %d:%d\t%d:%d\t%.2f\n", database[found_index].operation.start_hours, database[found_index].operation.start_minutes, database[found_index].operation.finish_hours, database[found_index].operation.finish_minutes, database[found_index].operation.price);
         }
-    }
+    };
 };
 
-int main()
-{
+int main() {
     char rates_str[MAX_STRING_SIZE];
     char command_string[MAX_STRING_SIZE];
     int rates_length;
@@ -359,7 +358,7 @@ int main()
                 for (i = 0; i < DATABASE_STORAGE; i++) {
                     if (strcmp(counter[i].license, license) == 0) {
                         detail_status = 1;
-                    }
+                    };
                 }
 
                 if (detail_status == 1) {
@@ -368,7 +367,7 @@ int main()
                 } else {
                     if (detail_status == 0) {
                         printf(" (ERROR) This vehicle never used the parking\n");
-                    }
+                    };
                 }
             } else {
                 if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes)) {
@@ -440,8 +439,7 @@ int main()
                         printf(" (ERROR) Incoherent exit time\n");
                         break;
                     case 4:
-                        process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, operation, counter);
-                        count_vehicles--;
+                        process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, operation, total_counter);
                         break;
                     default:
                         break;
@@ -484,6 +482,14 @@ int main()
 // exit 9910FSD 19:17
 // enter C 1909HJK 20:20
 // show occupation
+
+
+// FIRST STRING
+// BIKES:2/3/4#CARS:3/4/6#TRUCKS:5/10/12
+// CARS:3/4/6#TRUCKS:5/10/12#BIKES:2/3/4
+// TRUCKS:5/10/12#BIKES:2/3/4#CARS:3/4/6
+
+
 
 // 4-th check
 // enter C 5646GTH 12:15
