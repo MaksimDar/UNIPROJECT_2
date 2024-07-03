@@ -41,7 +41,6 @@ typedef struct {
     int finish_hours;
     int finish_minutes;
     float price;
-    int total_counter;
 } Operation;
 typedef struct {
     Operation operation[DATABASE_STORAGE];
