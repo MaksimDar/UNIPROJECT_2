@@ -42,14 +42,15 @@ typedef struct {
     int finish_minutes;
     float price;
 } Operation;
-typedef struct {
+struct Database {
     Operation operation[DATABASE_STORAGE];
-} Database;
+};
 
 typedef struct {
     char license[MAX_LICENSE_CHAR];
     int counter_entrance;
 } Counter;
+
 
 int checkDuplication(Licenses lic[], int count_vehicles, char license[]) {
     int i = 0;
@@ -80,8 +81,8 @@ int checkTime(Licenses lic[], int minutes, int hours, char license[]) {
     return time_status;
 };
 
-int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, Database database[], Operation operation[], int total_counter) {
-    int i;
+float operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, struct Database database, int total_counter) {
+    int i,j;
     int total_minutes;
     int enter_minutes;
     int exit_minutes;
@@ -130,84 +131,34 @@ int operationClosed(Licenses lic[], int count_vehicles, char license[], int hour
                 break;
             }
             total_price = total_minutes * price_minute;
-            database[total_counter].operation[total_counter].vehicle_type = lic[i].vehicle_type;
-            database[total_counter].operation[total_counter].start_hours = lic[i].hours;
-            database[total_counter].operation[total_counter].start_minutes = lic[i].minutes;
-            database[total_counter].operation[total_counter].finish_hours = hours;
-            database[total_counter].operation[total_counter].finish_minutes = minutes;
-            database[total_counter].operation[total_counter].price = total_price;
-            printf("Operation closed: %.2f euros\n", database[total_counter].operation[total_counter].price);
-            lic[i].license[0] = '\0';
+            printf("Operation closed: %.2f euros\n", total_price);
+            lic[i].license[count_vehicles] = '\0';
             lic[i].vehicle_type = '\0';
         };
     };
-    count_vehicles--;
-    return count_vehicles;
+    return total_price;
 };
 
-
-int addDatabase(int total_counter, Database database[], char license[], int hours, int minutes, char vechicle_type, Counter counter[]) {
-    int i;
-    int status = 1;
-    int found_index = -1;
-    int can_update = 1;
-    for (i = 0; i < total_counter; i++) {
-        if (strcmp(database[i].operation[i].license, license) == 0) {
-            found_index = i;
-            status = 2;
-            i = total_counter;
-        };
-    };
-
-    if (status == 1) {
-        found_index = total_counter;
-    };
-    if (counter[found_index].counter_entrance > 10) {
-        can_update = 0;
-    }
-    if (can_update) {
-        switch (status) {
-        case 1:
-            strcpy(database[found_index].operation[found_index].license, license);
-            database[found_index].operation[found_index].start_hours = hours;
-            database[found_index].operation[found_index].start_minutes = minutes;
-            database[found_index].operation[found_index].vehicle_type = vechicle_type;
-            strcpy(counter[found_index].license, license);
-            counter[found_index].counter_entrance = 1;
-            break;
-
-        case 2:
-            database[found_index].operation[found_index].start_hours = hours;
-            database[found_index].operation[found_index].start_minutes = minutes;
-            counter[found_index].counter_entrance++;
-            break;
-        default:
-            break;
-        }
-    }
-    return total_counter;
-};
-
-void checkDatabase(Database database[], char license[]) {
+void checkDatabase(struct Database database, char license[]) {
     int i;
     int status = 0;
     int found_index = -1;
     for (i = 0; i < DATABASE_STORAGE; i++) {
-        if (strcmp(database[i].operation[i].license, license) == 0) {
+        if (strcmp(database.operation[i].license, license) == 0) {
             found_index = i;
             status = 1;
         }
     }
     
     if (status == 1) {
-        printf("Plate: %s\n", database[found_index].operation[found_index].license);
-        if (database[found_index].operation[found_index].vehicle_type == 'B') {
+        printf("Plate: %s\n", database.operation[found_index].license);
+        if (database.operation[found_index].vehicle_type == 'B') {
             printf("Type of vehicle: BIKE\n");
         } else {
-            if (database[found_index].operation[found_index].vehicle_type == 'C') {
+            if (database.operation[found_index].vehicle_type == 'C') {
                 printf("Type of vehicle: CAR\n");
             } else {
-                if (database[found_index].operation[found_index].vehicle_type == 'T') {
+                if (database.operation[found_index].vehicle_type == 'T') {
                     printf("Type of vehicle: TRUCK\n");
                 }
             }
@@ -215,14 +166,14 @@ void checkDatabase(Database database[], char license[]) {
     };
 };
 
-void checkOperations(Database database[], char license[], int total_counter) {
+void checkOperations(struct Database database, char license[], int total_counter) {
     int i;
     int status = 0;
     printf("Operations:\n");
-    for (i = 0; i < total_counter; i++) {
-        if (strcmp(database[i].operation[i].license, license) == 0) {
+    for (i = 0; i <= total_counter; i++) {
+        if (strcmp(database.operation[i].license, license) == 0) {
             status = 1;
-            printf("        %d:%d\t%d:%d\t(%.2f euros)\n", database[i].operation[i].start_hours, database[i].operation[i].start_minutes, database[i].operation[i].finish_hours, database[i].operation[i].finish_minutes, database[i].operation[i].price);
+            printf("        %d:%d\t%d:%d\t(%.2f euros)\n", database.operation[i].start_hours, database.operation[i].start_minutes, database.operation[i].finish_hours, database.operation[i].finish_minutes, database.operation[i].price);
         }
     };
     if (status == 0) {
@@ -251,6 +202,7 @@ int main() {
     int detail_status = 0;
     int i;
     int time;
+    float price;
     int process;
     int total_counter = 0;
     Bikes bike;
@@ -258,7 +210,7 @@ int main() {
     Trucks truck;
     Licenses lic[MAX_VEHICLES - 1];
     Operation operation[100];
-    Database database[DATABASE_STORAGE];
+    struct Database database;
     Counter counter[100];
     int personal_counter = 1;
     int enter_counter;
@@ -396,7 +348,11 @@ int main() {
                             lic[current_index].minutes = minutes;
                             count_vehicles++;
                             total_counter++;
-                            addDatabase(total_counter, database, license, hours, minutes, vechicle_type, counter);
+                            // addDatabase(total_counter, database, license, hours, minutes, vechicle_type, counter);
+                            strcpy(database.operation[total_counter].license, license);
+                            database.operation[total_counter].start_hours = hours;
+                            database.operation[total_counter].start_minutes = minutes;
+                            database.operation[total_counter].vehicle_type = vechicle_type;
                         } else  {
                             printf(" (ERROR) No more vehicles are accepted\n");
                         };
@@ -430,12 +386,16 @@ int main() {
                         printf(" (ERROR) Incoherent exit time\n");
                         break;
                     case 4:
-                        process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, operation, total_counter);
+                        price = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, total_counter);
+                        count_vehicles--;
+                        database.operation[total_counter].finish_hours = hours;
+                        database.operation[total_counter].finish_minutes = minutes;
+                        database.operation[total_counter].price = price;
                         break;
                     default:
                         break;
                     }
-                }
+                };
             }
         }
     } while (1);
