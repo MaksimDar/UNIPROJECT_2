@@ -41,6 +41,7 @@
 //     int finish_hours;
 //     int finish_minutes;
 //     float price;
+//     int status;
 // } Operation;
 // struct Database {
 //     Operation operation[DATABASE_STORAGE];
@@ -50,6 +51,7 @@
 //     char license[MAX_LICENSE_CHAR];
 //     int counter_entrance;
 // } Counter;
+
 
 // int checkDuplication(Licenses lic[], int count_vehicles, char license[]) {
 //     int i = 0;
@@ -80,7 +82,7 @@
 //     return time_status;
 // };
 
-// int operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, struct Database database, int total_counter) {
+// float operationClosed(Licenses lic[], int count_vehicles, char license[], int hours, int minutes, Bikes bike, Cars car, Trucks truck, struct Database database, int total_counter) {
 //     int i,j;
 //     int total_minutes;
 //     int enter_minutes;
@@ -130,63 +132,12 @@
 //                 break;
 //             }
 //             total_price = total_minutes * price_minute;
-//             database.operation[total_counter].vehicle_type = lic[i].vehicle_type;
-//             database.operation[total_counter].start_hours = lic[i].hours;
-//             database.operation[total_counter].start_minutes = lic[i].minutes;
-//             database.operation[total_counter].finish_hours = hours;
-//             database.operation[total_counter].finish_minutes = minutes;
-//             database.operation[total_counter].price = total_price;
-//             printf("Operation closed: %.2f euros\n", database.operation[total_counter].price);
+//             printf("Operation closed: %.2f euros\n", total_price);
 //             lic[i].license[count_vehicles] = '\0';
 //             lic[i].vehicle_type = '\0';
 //         };
 //     };
-//     count_vehicles--;
-//     return count_vehicles;
-// };
-
-
-// int addDatabase(int total_counter, struct Database database, char license[], int hours, int minutes, char vechicle_type, Counter counter[]) {
-//     int i;
-//     int status = 1;
-//     int found_index = -1;
-//     int can_update = 1;
-//     for (i = 0; i < total_counter; i++) {
-//         if (strcmp(database.operation[i].license, license) == 0) {
-//             found_index = i;
-//             status = 2;
-//             i = total_counter;
-//         };
-//     };
-
-//     if (status == 1) {
-//         found_index = total_counter;
-//     };
-//     if (counter[found_index].counter_entrance > 10) {
-//         can_update = 0;
-//     }
-//     if (can_update) {
-//         switch (status) {
-//         case 1:
-//             strcpy(database.operation[found_index].license, license);
-//             database.operation[found_index].start_hours = hours;
-//             database.operation[found_index].start_minutes = minutes;
-//             database.operation[found_index].vehicle_type = vechicle_type;
-
-//             strcpy(counter[found_index].license, license);
-//             counter[found_index].counter_entrance = 1;
-//             break;
-
-//         case 2:
-//             database.operation[found_index].start_hours = hours;
-//             database.operation[found_index].start_minutes = minutes;
-//             counter[found_index].counter_entrance++;
-//             break;
-//         default:
-//             break;
-//         }
-//     }
-//     return total_counter;
+//     return total_price;
 // };
 
 // void checkDatabase(struct Database database, char license[]) {
@@ -219,16 +170,28 @@
 // void checkOperations(struct Database database, char license[], int total_counter) {
 //     int i;
 //     int status = 0;
-//     printf("Operations:\n");
-//     for (i = 0; i < total_counter; i++) {
+//     float total_price = 0;
+//     for (i = 0; i <= total_counter; i++) {
 //         if (strcmp(database.operation[i].license, license) == 0) {
 //             status = 1;
-//             printf("        %d:%d\t%d:%d\t(%.2f euros)\n", database.operation[i].start_hours, database.operation[i].start_minutes, database.operation[i].finish_hours, database.operation[i].finish_minutes, database.operation[i].price);
-//         }
+//         };
 //     };
-//     if (status == 0) {
+//     if (status == 1) {
+//         printf("Operations:\n");
+//         for (i = 0; i <= total_counter; i++) {
+//             if (strcmp(database.operation[i].license, license) == 0) {
+//                 if (database.operation[i].status == 1) {
+//                     printf("        %02d:%02d\t**:**\t(**.** euros)\n", database.operation[i].start_hours, database.operation[i].start_minutes);
+//                 } else {
+//                     printf("        %02d:%02d\t%02d:%02d\t(%.2f euros)\n", database.operation[i].start_hours, database.operation[i].start_minutes, database.operation[i].finish_hours, database.operation[i].finish_minutes, database.operation[i].price);
+//                     total_price += database.operation[i].price;  
+//                 } 
+//             }
+//         };
+//         printf("Total paid: %.2f euros\n", total_price);
+//     } else {
 //         printf(" (ERROR) This vehicle never used the parking\n");
-//     }
+//     } 
 // };
 
 // int main() {
@@ -252,6 +215,7 @@
 //     int detail_status = 0;
 //     int i;
 //     int time;
+//     float price;
 //     int process;
 //     int total_counter = 0;
 //     Bikes bike;
@@ -263,6 +227,7 @@
 //     Counter counter[100];
 //     int personal_counter = 1;
 //     int enter_counter;
+//     int finish_status = 1;
 //     printf("Welcome to Parking LS!\n");
 //     printf("Enter tariffs: ");
 //     scanf("%s", rates_str);
@@ -293,6 +258,10 @@
 //     do {
 //         printf("\nParking LS> ");
 //         fgets(command_string, sizeof(command_string), stdin);
+//         if (strcmp(command_string, "quit\n") == 0) {
+//             finish_status = 0;
+//             printf("See you later!");
+//         } else {
 //         if (strcmp(command_string, "show occupation\n") == 0) {
 //             printf("Vehicles currently in the parking:\n");
 //             printf("BIKES: ");
@@ -359,8 +328,12 @@
 //             }
 //         } else {
 //             if (sscanf(command_string, "show detail %s", license)) {
-//                 checkDatabase(database, license);
-//                 checkOperations(database, license, total_counter);  
+//                 if (sscanf(command_string, "show detail %s", license) != 1) {
+//                     printf(" (ERROR) Wrong command\n");
+//                 } else {
+//                     checkDatabase(database, license);
+//                     checkOperations(database, license, total_counter);  
+//                 }
 //             } else {
 //                 if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes)) {
 //                     if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T')) {
@@ -397,7 +370,11 @@
 //                             lic[current_index].minutes = minutes;
 //                             count_vehicles++;
 //                             total_counter++;
-//                             addDatabase(total_counter, database, license, hours, minutes, vechicle_type, counter);
+//                             strcpy(database.operation[total_counter].license, license);
+//                             database.operation[total_counter].start_hours = hours;
+//                             database.operation[total_counter].start_minutes = minutes;
+//                             database.operation[total_counter].vehicle_type = vechicle_type;
+//                             database.operation[total_counter].status = 1;
 //                         } else  {
 //                             printf(" (ERROR) No more vehicles are accepted\n");
 //                         };
@@ -431,102 +408,21 @@
 //                         printf(" (ERROR) Incoherent exit time\n");
 //                         break;
 //                     case 4:
-//                         process = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, total_counter);
+//                         price = operationClosed(lic, count_vehicles, license, hours, minutes, bike, car, truck, database, total_counter);
+//                         count_vehicles--;
+//                         database.operation[total_counter].finish_hours = hours;
+//                         database.operation[total_counter].finish_minutes = minutes;
+//                         database.operation[total_counter].status = 0;
+//                         database.operation[total_counter].price = price;
 //                         break;
 //                     default:
 //                         break;
 //                     }
-//                 }
+//                 };
+
 //             }
 //         }
-//     } while (1);
+//         }
+//     } while (finish_status);
 //     return 0;
 // }
-// FIRST STRING
-// BIKES:2/3/4#CARS:3/4/6#TRUCKS:5/10/12
-// CARS:3/4/6#TRUCKS:5/10/12#BIKES:2/3/4
-// TRUCKS:5/10/12#BIKES:2/3/4#CARS:3/4/6
-
-// ENTER STRING
-// enter C 6756FGT 12:55
-// enter B 1234TTT 13:34
-// enter T 1122BGT 13:46
-// enter T 8986GTT 17:00
-// enter T 1900FRW 19:25
-// enter C 1999FTW 20:20
-// enter B 1112TRW 21:25
-// enter C 6767BBX 21:39
-// enter C 9871CDF 22:23
-
-// EXIT STRING
-// exit 5109GTY 13:14
-
-// enter C 5109GTY 9:23
-// enter B 7743BWQ 6:49
-// exit 5109GTY 13:14
-// exit 7743BWQ 21:05
-
-// 3-rd part check
-// enter B 6754BBV 11:15
-// enter C 8788CDF 13:27
-// enter C 9910FSD 14:25
-// enter C 9078FRS 17:19
-// exit 9910FSD 19:17
-// enter C 1909HJK 20:20
-// show occupation
-
-
-// FIRST STRING
-// BIKES:2/3/4#CARS:3/4/6#TRUCKS:5/10/12
-// CARS:3/4/6#TRUCKS:5/10/12#BIKES:2/3/4
-// TRUCKS:5/10/12#BIKES:2/3/4#CARS:3/4/6
-
-
-// 4-th check
-// enter C 5646GTH 12:15
-// show detail 5634GFT
-
-// 5-th check
-// enter C 3454FFR 12:35
-// exit 3454FFR 13:47
-// enter C 3454FFR 16:20
-// exit 3454FFR 20:00
-// enter C 3454FFR 20:55
-// exit 3454FFR 23:23
-// show detail 3454FFR
-
-// check the work of database
-
-
-// enter C 6756FGT 12:55
-// exit  6756FGT 12:55
-
-// enter C 6756FGT 13:15
-// exit  6756FGT 14:14
-
-// enter C 6756FGT 14:28
-// exit  6756FGT 14:56
-
-// enter C 6756FGT 15:55
-// exit  6756FGT 16:30
-
-// enter C 6756FGT 16:55
-// exit  6756FGT 17:30
-
-// enter C 6756FGT 17:55
-// exit  6756FGT 18:30
-
-// enter C 6756FGT 18:55
-// exit  6756FGT 19:30
-
-// enter C 6756FGT 19:55
-// exit  6756FGT 20:30
-
-// enter C 6756FGT 20:55
-// exit  6756FGT 21:30
-
-// enter C 6756FGT 21:55
-// exit  6756FGT 22:30
-
-// enter C 6756FGT 22:55
-// exit  6756FGT 23:30

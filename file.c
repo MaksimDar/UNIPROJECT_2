@@ -41,6 +41,7 @@ typedef struct {
     int finish_hours;
     int finish_minutes;
     float price;
+    int status;
 } Operation;
 struct Database {
     Operation operation[DATABASE_STORAGE];
@@ -169,17 +170,31 @@ void checkDatabase(struct Database database, char license[]) {
 void checkOperations(struct Database database, char license[], int total_counter) {
     int i;
     int status = 0;
-    printf("Operations:\n");
+    float total_price = 0;
     for (i = 0; i <= total_counter; i++) {
         if (strcmp(database.operation[i].license, license) == 0) {
             status = 1;
-            printf("        %d:%d\t%d:%d\t(%.2f euros)\n", database.operation[i].start_hours, database.operation[i].start_minutes, database.operation[i].finish_hours, database.operation[i].finish_minutes, database.operation[i].price);
-        }
+        };
     };
-    if (status == 0) {
+    if (status == 1) {
+        printf("Operations:\n");
+        for (i = 0; i <= total_counter; i++) {
+            if (strcmp(database.operation[i].license, license) == 0) {
+                if (database.operation[i].status == 1) {
+                    printf("        %02d:%02d\t**:**\t(**.** euros)\n", database.operation[i].start_hours, database.operation[i].start_minutes);
+                } else {
+                    printf("        %02d:%02d\t%02d:%02d\t(%.2f euros)\n", database.operation[i].start_hours, database.operation[i].start_minutes, database.operation[i].finish_hours, database.operation[i].finish_minutes, database.operation[i].price);
+                    total_price += database.operation[i].price;  
+                } 
+            }
+        };
+        printf("Total paid: %.2f euros\n", total_price);
+    } else {
         printf(" (ERROR) This vehicle never used the parking\n");
-    }
+    } 
 };
+
+
 
 int main() {
     char rates_str[MAX_STRING_SIZE];
@@ -214,6 +229,7 @@ int main() {
     Counter counter[100];
     int personal_counter = 1;
     int enter_counter;
+    int finish_status = 1;
     printf("Welcome to Parking LS!\n");
     printf("Enter tariffs: ");
     scanf("%s", rates_str);
@@ -244,6 +260,10 @@ int main() {
     do {
         printf("\nParking LS> ");
         fgets(command_string, sizeof(command_string), stdin);
+        // if (strcmp(command_string, "quit\n") == 0) {
+        //     finish_status = 0;
+        //     printf("See you later!");
+        // } else {
         if (strcmp(command_string, "show occupation\n") == 0) {
             printf("Vehicles currently in the parking:\n");
             printf("BIKES: ");
@@ -310,8 +330,12 @@ int main() {
             }
         } else {
             if (sscanf(command_string, "show detail %s", license)) {
-                checkDatabase(database, license);
-                checkOperations(database, license, total_counter);  
+                if (sscanf(command_string, "show detail %s", license) != 1) {
+                    printf(" (ERROR) Wrong command\n");
+                } else {
+                    checkDatabase(database, license);
+                    checkOperations(database, license, total_counter);  
+                }
             } else {
                 if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes)) {
                     if (sscanf(command_string, "enter %c %s %d:%d", &vechicle_type, license, &hours, &minutes) != 4 || (vechicle_type != 'B' && vechicle_type != 'C' && vechicle_type != 'T')) {
@@ -348,11 +372,11 @@ int main() {
                             lic[current_index].minutes = minutes;
                             count_vehicles++;
                             total_counter++;
-                            // addDatabase(total_counter, database, license, hours, minutes, vechicle_type, counter);
                             strcpy(database.operation[total_counter].license, license);
                             database.operation[total_counter].start_hours = hours;
                             database.operation[total_counter].start_minutes = minutes;
                             database.operation[total_counter].vehicle_type = vechicle_type;
+                            database.operation[total_counter].status = 1;
                         } else  {
                             printf(" (ERROR) No more vehicles are accepted\n");
                         };
@@ -390,13 +414,17 @@ int main() {
                         count_vehicles--;
                         database.operation[total_counter].finish_hours = hours;
                         database.operation[total_counter].finish_minutes = minutes;
+                        database.operation[total_counter].status = 0;
                         database.operation[total_counter].price = price;
                         break;
                     default:
                         break;
                     }
+       
                 };
-            }
+
+            // }
+        }
         }
     } while (1);
     return 0;
@@ -452,6 +480,7 @@ int main() {
 // exit 3454FFR 20:00
 // enter C 3454FFR 20:55
 // exit 3454FFR 23:23
+// enter C 3454FFR 23:30
 // show detail 3454FFR
 
 // check the work of database
